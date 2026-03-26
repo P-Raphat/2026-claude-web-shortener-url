@@ -14,13 +14,19 @@ export const createUrlSchema = z.object({
 
 export const loginSchema = z.object({
   email: z.email(),
-  password: z.string().min(6),
+  password: z.string().min(8),
 });
 
 export const registerSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.email(),
   password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export const updateUrlSchema = z.object({
+  title: z.string().max(255).nullable().optional(),
+  isActive: z.boolean().optional(),
+  expiresAt: z.iso.datetime().nullable().optional(),
 });
 
 export type CreateUrlInput = z.infer<typeof createUrlSchema>;

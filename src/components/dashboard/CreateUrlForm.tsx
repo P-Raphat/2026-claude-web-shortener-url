@@ -58,7 +58,7 @@ export function CreateUrlForm({ onCreated }: Props) {
       setExpiresTime("");
       onCreated();
     } else {
-      const json = await res.json();
+      const json = await res.json().catch(() => ({}));
       setError(json.error ?? "Failed to create URL");
     }
     setLoading(false);

@@ -36,22 +36,36 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json();
+  let body;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
   const parsed = createUrlSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
   const { originalUrl, title, expiresAt } = parsed.data;
-  let shortCode = parsed.data.shortCode ?? nanoid(7);
+  let shortCode = parsed.data.shortCode;
 
-  // Ensure uniqueness
-  const existing = await prisma.url.findUnique({ where: { shortCode } });
-  if (existing) {
-    if (parsed.data.shortCode) {
+  if (shortCode) {
+    const existing = await prisma.url.findUnique({ where: { shortCode } });
+    if (existing) {
       return NextResponse.json({ error: "Short code already taken" }, { status: 409 });
     }
-    shortCode = nanoid(7);
+  } else {
+    let found = false;
+    for (let i = 0; i < 5; i++) {
+      shortCode = nanoid(7);
+      const existing = await prisma.url.findUnique({ where: { shortCode } });
+      if (!existing) { found = true; break; }
+    }
+    if (!found) {
+      return NextResponse.json({ error: "Failed to generate unique code, please try again" }, { status: 503 });
+    }
   }
 
   const url = await prisma.url.create({

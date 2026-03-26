@@ -4,7 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  let body;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
   const parsed = registerSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
@@ -13,7 +19,7 @@ export async function POST(req: NextRequest) {
   const { name, email, password } = parsed.data;
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    return NextResponse.json({ error: "Email already in use" }, { status: 409 });
+    return NextResponse.json({ error: "Registration failed" }, { status: 400 });
   }
 
   const hashed = await bcrypt.hash(password, 12);

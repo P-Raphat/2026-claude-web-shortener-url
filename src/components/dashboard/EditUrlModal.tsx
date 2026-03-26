@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-interface Url {
-  id: string;
-  title: string | null;
-  isActive: boolean;
-  expiresAt: string | null;
-}
+import type { Url } from "@/types/url";
 
 interface Props {
   url: Url;

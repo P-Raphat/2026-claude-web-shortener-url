@@ -8,14 +8,12 @@ import { registerSchema } from "@/lib/validations";
 export default function RegisterPage() {
   const router = useRouter();
   const { data: session } = useSession();
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
-    setMounted(true);
     if (session?.user) {
       router.push("/dashboard");
     }
   }, [session, router]);
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -54,7 +52,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-900 to-slate-800 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900">Create an account</h1>

@@ -4,17 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { ClickChart } from "./ClickChart";
 import { EditUrlModal } from "./EditUrlModal";
 import { Toast, type ToastData } from "@/components/ui/Toast";
-
-interface Url {
-  id: string;
-  shortCode: string;
-  originalUrl: string;
-  title: string | null;
-  isActive: boolean;
-  createdAt: string;
-  expiresAt: string | null;
-  _count: { clicks: number };
-}
+import type { Url } from "@/types/url";
 
 function formatExpiry(iso: string): string {
   const d = new Date(iso);
