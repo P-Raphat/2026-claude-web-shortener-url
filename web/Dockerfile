@@ -1,32 +1,41 @@
-# 1. เริ่มจากอะไร — ใช้ bun image เป็น base
+# ---- Base ----
 FROM oven/bun:1 AS base
 WORKDIR /app
 
-# 2. ติดตั้ง dependencies ก่อน (cache layer)
+# ---- Dependencies (cached layer) ----
 FROM base AS deps
 COPY package.json bun.lock* ./
 RUN bun install --frozen-lockfile
 
-# 3. Build application
+# ---- Build ----
 FROM base AS builder
-ENV DATABASE_URL="mysql://placeholder:placeholder@localhost:3306/placeholder"
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN bunx prisma generate
-RUN bun run build
+# Placeholder URL — prisma generate needs it but doesn't connect
+ENV DATABASE_URL="mysql://build:build@localhost:3306/build"
+RUN bunx prisma generate && bun run build
 
-# 4. Production — copy เฉพาะที่ต้องใช้ใน production
-FROM base AS runner
+# ---- Production ----
+FROM oven/bun:1-slim AS runner
 ENV NODE_ENV=production
 WORKDIR /app
 
-RUN useradd --system --uid 1001 nextjs
+RUN adduser --system --uid 1001 nextjs
 
+# Runtime node_modules: serverExternalPackages (mariadb, @prisma/adapter-mariadb)
+# and prisma CLI for migrate deploy are NOT traced by Next.js standalone
+COPY --from=deps /app/node_modules ./node_modules
+
+# Next.js standalone output (merges its traced node_modules on top)
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+
+# Prisma: generated client + schema + migrations + config
 COPY --from=builder /app/src/generated ./src/generated
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./
 
 USER nextjs
 EXPOSE 3000
-CMD ["bun", "server.js"]
+CMD ["sh", "-c", "bunx prisma migrate deploy && bun server.js"]
