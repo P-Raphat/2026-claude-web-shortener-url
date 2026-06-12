@@ -45,7 +45,7 @@ export default function RegisterPage() {
     if (res.ok) {
       router.push("/login");
     } else {
-      const json = await res.json();
+      const json = await res.json().catch(() => ({}));
       setError(json.error ?? "Registration failed");
     }
     setLoading(false);

@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
 
   const url = await prisma.url.create({
     data: {
-      shortCode,
+      shortCode: shortCode as string,
       originalUrl,
       title,
       expiresAt: expiresAt ? new Date(expiresAt) : undefined,
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
     JSON.stringify({
       id: url.id,
       original_url: url.originalUrl,
-      expires_at: url.expiresAt,
+      expires_at: url.expiresAt?.toISOString() ?? null,
       is_active: url.isActive,
     }),
     "EX",

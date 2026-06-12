@@ -12,22 +12,16 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   if (url.userId !== session.user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   // Clicks per day for the last 30 days
+  // Table name from Click model @@map("shorturl-click") in prisma/schema.prisma
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const rawClicks = await prisma.click.findMany({
-    where: {
-      urlId: id,
-      clickedAt: { gte: thirtyDaysAgo },
-    },
-    select: { clickedAt: true },
-    orderBy: { clickedAt: "asc" },
-  });
-
-  const clicksByDay = new Map<string, number>();
-  for (const click of rawClicks) {
-    const date = click.clickedAt.toISOString().slice(0, 10);
-    clicksByDay.set(date, (clicksByDay.get(date) ?? 0) + 1);
-  }
-  const clicks = Array.from(clicksByDay, ([date, count]) => ({ date, count }));
+  const rows = await prisma.$queryRaw<{ date: string; count: bigint }[]>`
+    SELECT DATE(clicked_at) AS date, COUNT(*) AS count
+    FROM \`shorturl-click\`
+    WHERE url_id = ${id} AND clicked_at >= ${thirtyDaysAgo}
+    GROUP BY DATE(clicked_at)
+    ORDER BY date ASC
+  `;
+  const clicks = rows.map((r) => ({ date: r.date, count: Number(r.count) }));
   const total = await prisma.click.count({ where: { urlId: id } });
 
   return NextResponse.json({ clicks, total });
