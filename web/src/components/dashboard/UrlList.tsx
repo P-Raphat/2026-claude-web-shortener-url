@@ -83,70 +83,112 @@ export function UrlList({ refreshKey }: Props) {
     }
   }
 
-  const redirectBase = process.env.NEXT_PUBLIC_REDIRECT_URL ?? "";
+  async function copyToClipboard(shortCode: string) {
+    const url = `${window.location.origin}/${shortCode}`;
+    await navigator.clipboard.writeText(url);
+    setToast({ type: "success", message: "Copied to clipboard!" });
+  }
+
+  if (loading && urls.length === 0) {
+    return <p className="text-ink-ghost text-sm">Loading…</p>;
+  }
+
+  if (!loading && urls.length === 0) {
+    return (
+      <div className="border border-edge rounded-lg p-8 text-center">
+        <p className="text-ink-ghost text-sm">No links yet.</p>
+        <p className="text-ink-ghost text-xs mt-1">Shorten your first URL above.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
-      {loading && <p className="text-slate-400 text-sm">Loading…</p>}
       {urls.map((url) => (
-        <div key={url.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          {/* Info section */}
-          <div className="p-4 flex items-start justify-between gap-4">
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-sm text-gray-900 truncate">{url.title ?? url.shortCode}</p>
-              <a href={`${redirectBase}/${url.shortCode}`} target="_blank" rel="noreferrer" className="text-blue-600 text-sm hover:underline">
-                {redirectBase}/{url.shortCode}
-              </a>
-              <p className="text-gray-400 text-xs truncate mt-0.5">{url.originalUrl}</p>
+        <div key={url.id} className="border border-edge rounded-lg overflow-hidden">
+          <div className="p-4 flex items-start gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm text-ink truncate">
+                {url.title ?? url.shortCode}
+              </p>
+              <div className="flex items-center gap-2.5 mt-1">
+                <a
+                  href={`/${url.shortCode}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-gold text-sm hover:underline underline-offset-2"
+                >
+                  /{url.shortCode}
+                </a>
+                <button
+                  onClick={() => copyToClipboard(url.shortCode)}
+                  className="text-[11px] text-ink-ghost hover:text-ink-lo transition-colors uppercase tracking-wide"
+                >
+                  copy
+                </button>
+              </div>
+              <p className="text-ink-ghost text-xs truncate mt-0.5">{url.originalUrl}</p>
               {url.expiresAt && (
-                <p className={`text-xs mt-1 font-medium ${new Date(url.expiresAt) < new Date() ? "text-red-500" : "text-amber-500"}`}>
-                  Expires: {formatExpiry(url.expiresAt)}
+                <p className={`text-xs mt-1 ${new Date(url.expiresAt) < new Date() ? "text-danger" : "text-ink-ghost"}`}>
+                  Expires {formatExpiry(url.expiresAt)}
                 </p>
               )}
             </div>
-            {/* Active badge — top right */}
-            <button
-              onClick={() => toggleActive(url)}
-              className={`shrink-0 text-xs px-3 py-1.5 rounded-full font-semibold transition-colors ${url.isActive ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}
-            >
-              {url.isActive ? "● Active" : "○ Inactive"}
-            </button>
-          </div>
 
-          {/* Action bar */}
-          <div className="border-t border-gray-100 px-4 py-2 flex items-center justify-between gap-2 bg-gray-50">
-            <span className="text-xs text-gray-400 font-medium">{url._count.clicks} clicks</span>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-end gap-2 shrink-0">
               <button
-                onClick={() => viewStats(url.id)}
-                className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors ${selectedId === url.id ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-blue-50 text-blue-600 hover:bg-blue-100"}`}
+                onClick={() => toggleActive(url)}
+                className={`text-xs px-2.5 py-1 rounded font-medium transition-colors ${
+                  url.isActive
+                    ? "bg-gold-dim text-gold"
+                    : "bg-raised text-ink-ghost"
+                }`}
               >
-                {selectedId === url.id ? "Hide stats" : "Stats"}
+                {url.isActive ? "Active" : "Inactive"}
               </button>
-              <button
-                onClick={() => setEditUrl(url)}
-                className="text-xs px-3 py-1.5 rounded-lg font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => deleteUrl(url.id)}
-                className="text-xs px-3 py-1.5 rounded-lg font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
-              >
-                Delete
-              </button>
+              <span className="text-xs text-ink-ghost tabular-nums">
+                {url._count.clicks} clicks
+              </span>
             </div>
           </div>
 
-          {/* Stats chart */}
+          <div className="border-t border-edge px-4 py-2 flex items-center justify-end gap-1 bg-raised">
+            <button
+              onClick={() => viewStats(url.id)}
+              className={`text-xs px-3 py-1.5 rounded transition-colors font-medium ${
+                selectedId === url.id
+                  ? "text-gold"
+                  : "text-ink-lo hover:text-ink"
+              }`}
+            >
+              {selectedId === url.id ? "Hide stats" : "Stats"}
+            </button>
+            <button
+              onClick={() => setEditUrl(url)}
+              className="text-xs px-3 py-1.5 rounded text-ink-lo hover:text-ink transition-colors"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => deleteUrl(url.id)}
+              className="text-xs px-3 py-1.5 rounded text-danger hover:bg-danger-dim transition-colors"
+            >
+              Delete
+            </button>
+          </div>
+
           {selectedId === url.id && stats && (
-            <div className="px-4 pb-4 pt-3 border-t border-gray-100">
-              <p className="text-xs text-gray-500 mb-2">Last 30 days — <span className="font-semibold text-gray-700">{stats.total} total clicks</span></p>
+            <div className="px-4 pb-4 pt-3 border-t border-edge">
+              <p className="text-xs text-ink-ghost mb-3">
+                Last 30 days —{" "}
+                <span className="font-medium text-ink-lo">{stats.total} total clicks</span>
+              </p>
               <ClickChart data={stats.data} />
             </div>
           )}
         </div>
       ))}
+
       {editUrl && (
         <EditUrlModal
           url={editUrl}
@@ -158,9 +200,21 @@ export function UrlList({ refreshKey }: Props) {
 
       {total > 20 && (
         <div className="flex gap-2 justify-center pt-2">
-          <button disabled={page === 1} onClick={() => setPage((p) => p - 1)} className="px-3 py-1.5 border border-slate-600 rounded-lg text-sm text-slate-200 disabled:opacity-40 hover:bg-slate-700 transition-colors">Prev</button>
-          <span className="text-sm py-1.5 text-slate-300">Page {page}</span>
-          <button disabled={page * 20 >= total} onClick={() => setPage((p) => p + 1)} className="px-3 py-1.5 border border-slate-600 rounded-lg text-sm text-slate-200 disabled:opacity-40 hover:bg-slate-700 transition-colors">Next</button>
+          <button
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+            className="px-3 py-1.5 border border-edge rounded text-sm text-ink-lo disabled:opacity-30 hover:border-edge-hi hover:text-ink transition-colors"
+          >
+            Prev
+          </button>
+          <span className="text-sm py-1.5 text-ink-ghost">Page {page}</span>
+          <button
+            disabled={page * 20 >= total}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-3 py-1.5 border border-edge rounded text-sm text-ink-lo disabled:opacity-30 hover:border-edge-hi hover:text-ink transition-colors"
+          >
+            Next
+          </button>
         </div>
       )}
     </div>

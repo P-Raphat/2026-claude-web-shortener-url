@@ -34,13 +34,18 @@ export default async function LinkErrorPage({
   const { code, title, description } = reasons[reason ?? ""] ?? fallback;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-900 to-slate-800 px-4">
-      <div className="text-center">
-        <p className="text-6xl font-bold text-slate-600 mb-4">{code}</p>
-        <h1 className="text-2xl font-bold text-white mb-2">{title}</h1>
-        <p className="text-slate-400 mb-8">{description}</p>
-        <Link href="/" className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
-          Go home
+    <div className="min-h-screen bg-canvas flex items-center justify-center px-8">
+      <div className="max-w-[400px] w-full">
+        <p className="font-display text-8xl font-semibold text-edge-hi mb-6 tabular-nums leading-none">
+          {code}
+        </p>
+        <h1 className="font-display text-2xl font-semibold text-ink mb-2">{title}</h1>
+        <p className="text-ink-lo text-sm leading-relaxed mb-8 max-w-[40ch]">{description}</p>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm text-ink-lo hover:text-ink transition-colors underline underline-offset-4"
+        >
+          ← Go home
         </Link>
       </div>
     </div>

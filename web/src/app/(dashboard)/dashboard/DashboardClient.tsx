@@ -13,17 +13,22 @@ export function DashboardClient({ user }: Props) {
   const [refreshKey, setRefreshKey] = useState(0);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-900 to-slate-800">
-      <header className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-white">URL Shortener</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-slate-300">{user.name ?? user.email}</span>
-          <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-sm text-red-400 hover:text-red-300 transition-colors">
+    <div className="min-h-screen bg-canvas">
+      <header className="border-b border-edge px-6 py-4 flex items-center justify-between">
+        <span className="font-display text-base font-semibold text-ink tracking-tight">
+          URL Shortener
+        </span>
+        <div className="flex items-center gap-6">
+          <span className="text-xs text-ink-ghost hidden sm:block">{user.name ?? user.email}</span>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="text-xs text-ink-lo hover:text-ink transition-colors"
+          >
             Sign out
           </button>
         </div>
       </header>
-      <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+      <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
         <CreateUrlForm onCreated={() => setRefreshKey((k) => k + 1)} />
         <UrlList refreshKey={refreshKey} />
       </main>

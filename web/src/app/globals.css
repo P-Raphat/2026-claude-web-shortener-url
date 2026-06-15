@@ -1,26 +1,49 @@
 @import "tailwindcss";
 
+/* Design tokens */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --canvas:     oklch(0.09  0.006 260);
+  --surface:    oklch(0.135 0.006 260);
+  --raised:     oklch(0.18  0.007 260);
+  --edge:       oklch(0.26  0.006 260);
+  --edge-hi:    oklch(0.38  0.008 260);
+  --ink:        oklch(0.96  0.004 260);
+  --ink-lo:     oklch(0.74  0.007 260);
+  --ink-ghost:  oklch(0.55  0.006 260);
+  --gold:       oklch(0.79  0.14  72);
+  --gold-fg:    oklch(0.14  0.03  72);
+  --gold-dim:   oklch(0.22  0.05  72);
+  --danger:     oklch(0.70  0.18  25);
+  --danger-dim: oklch(0.18  0.06  25);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-bricolage);
+  --font-sans:    var(--font-manrope);
+
+  --color-canvas:     var(--canvas);
+  --color-surface:    var(--surface);
+  --color-raised:     var(--raised);
+  --color-edge:       var(--edge);
+  --color-edge-hi:    var(--edge-hi);
+  --color-ink:        var(--ink);
+  --color-ink-lo:     var(--ink-lo);
+  --color-ink-ghost:  var(--ink-ghost);
+  --color-gold:       var(--gold);
+  --color-gold-fg:    var(--gold-fg);
+  --color-gold-dim:   var(--gold-dim);
+  --color-danger:     var(--danger);
+  --color-danger-dim: var(--danger-dim);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-size: 16px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
 }

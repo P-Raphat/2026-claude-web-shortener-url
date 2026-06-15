@@ -20,7 +20,7 @@ FROM oven/bun:1-slim AS runner
 ENV NODE_ENV=production
 WORKDIR /app
 
-RUN adduser --system --uid 1001 nextjs
+RUN useradd --system --uid 1001 --no-create-home nextjs
 
 # Runtime node_modules: serverExternalPackages (mariadb, @prisma/adapter-mariadb)
 # and prisma CLI for migrate deploy are NOT traced by Next.js standalone
@@ -36,6 +36,7 @@ COPY --from=builder /app/src/generated ./src/generated
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
 
+RUN chown -R nextjs:nextjs /app
 USER nextjs
 EXPOSE 3000
 CMD ["sh", "-c", "bunx prisma migrate deploy && bun server.js"]
