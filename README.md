@@ -35,6 +35,14 @@ docker compose up --build -d
 
 # 4. Run database migration (first time only)
 docker compose exec web bunx prisma migrate deploy
+
+
+#if split build
+docker compose build redirect
+
+docker compose build web
+
+docker compose up -d
 ```
 
 Open http://localhost:3000 (admin) and http://localhost:8080/health (redirect health check).
